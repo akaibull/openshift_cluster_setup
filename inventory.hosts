@@ -1,0 +1,46 @@
+ # add follows to the end
+
+[OSEv3:children]
+masters
+nodes
+etcd
+
+[OSEv3:vars]
+# admin user created in previous section
+ansible_ssh_user=origin
+ansible_become=true
+openshift_deployment_type=origin
+
+# use HTPasswd for authentication
+
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
+# define default sub-domain for Master node
+
+openshift_public_hostname=112.196.20.244.xip.io 
+openshift_master_default_subdomain=apps.112.196.20.244.xip.io 
+
+openshift_storage_glusterfs_storageclass=False
+
+# allow unencrypted connection within cluster
+
+openshift_docker_insecure_registries=172.30.0.0/16
+openshift_disable_check=disk_availability,memory_availability,docker_storage,docker_image_availability
+
+[masters]
+localhost openshift_schedulable=true containerized=false ansible_connection=local
+
+[etcd]
+localhost ansible_connection=local
+
+[nodes]
+# defined values for [openshift_node_group_name] in the file below
+# [/usr/share/ansible/openshift-ansible/roles/openshift_facts/defaults/main.yml]
+localhost ansible_connection=local openshift_node_group_name='node-config-master-infra'
+
+# if you'd like to separate Master node feature and Infra node feature, set like follows
+# ctrl.srv.world openshift_node_group_name='node-config-master'
+# node01.srv.world openshift_node_group_name='node-config-compute'
+# node02.srv.world openshift_node_group_name='node-config-infra'
+
+# run Prerequisites Playbook
+
